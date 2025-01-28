@@ -20,20 +20,31 @@ class GoogleAuthTest extends TestCase
 
     public function test_user_can_authenticate_with_google()
     {
-        $abstractUser = Mockery::mock(\Laravel\Socialite\Two\User::class);
-        $abstractUser->shouldReceive('getEmail')->andReturn('test@gmail.com');
-        $abstractUser->shouldReceive('getName')->andReturn('Test User');
-        $abstractUser->shouldReceive('getId')->andReturn('1234567890');
+        User::factory()->create([
+            'email' => 'faizantahir6969@gmail.com',
+            'name' => 'Faizan Tahir',
+            'password' => bcrypt('password'),
+        ]);
 
-        Socialite::shouldReceive('driver->stateless->user')->andReturn($abstractUser);
+        $abstractUser = Mockery::mock(\Laravel\Socialite\Two\User::class);
+        $abstractUser->shouldReceive('getEmail')->andReturn('faizantahir6969@gmail.com');
+        $abstractUser->shouldReceive('getName')->andReturn('Faizan Tahir');
+        $abstractUser->shouldReceive('getId')->andReturn('1');
+
+        $mockSocialiteDriver = Mockery::mock('Laravel\Socialite\Contracts\Provider');
+        $mockSocialiteDriver->shouldReceive('user')->andReturn($abstractUser);
+
+        $mockSocialiteDriver->shouldReceive('setHttpClient')->andReturnSelf();
+
+        Socialite::shouldReceive('driver->setHttpClient')->andReturn($mockSocialiteDriver);
 
         $response = $this->get('/auth/google/callback');
 
         $this->assertAuthenticated();
 
         $this->assertDatabaseHas('users', [
-            'email' => 'test@gmail.com',
-            'name' => 'Test User',
+            'email' => 'faizantahir6969@gmail.com',
+            'name' => 'Faizan Tahir',
         ]);
 
         $response->assertRedirect('/dashboard');
