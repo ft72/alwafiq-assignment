@@ -19,7 +19,9 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')
+                ->setHttpClient(new \GuzzleHttp\Client(['verify' => false]))
+                ->user();
 
             if (!Str::endsWith($googleUser->getEmail(), '@gmail.com')) {
                 return redirect()->route('login')->withErrors(['email' => 'Only Gmail accounts are allowed.']);
